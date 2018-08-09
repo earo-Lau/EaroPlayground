@@ -1,0 +1,20 @@
+syntax = "proto3";
+package NAS.Model;
+
+message StreamingNode {
+    int32 id = 1;
+    int64 length = 2;
+    bytes stream = 3;
+    string upload_modle = 6;
+
+    StreamingNode left = 4;
+    StreamingNode right = 5;
+}
+
+message UploadModel {
+    string id = 1;
+    string name = 2;
+    int64 length = 3;
+
+    StreamingNode root = 4;
+}

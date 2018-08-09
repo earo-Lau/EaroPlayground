@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NAS.Client</string>
+    <string name="main_upload_btn">+</string>
+    <string name="title_activity_upload">UploadActivity</string>
+</resources>
