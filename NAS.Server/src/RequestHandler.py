@@ -43,14 +43,28 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if 'encoding' in context.request.header:
             encoding = context.request.header['encoding']
-        if method.upper() != 'GET':
-            context.request.body = json.loads(body, encoding)
+        if method.upper() != 'GET' and body != '':
+
+            if 'application/json' in header['content-type']:
+                context.request.body = json.loads(body, encoding)
+            elif 'application/x-protobuf' in header['content-type']:
+                context.request.body = body
 
         return context
 
-    def __load_url(self, url):
-        path, qs = url.split('?')
-        query = urlparse.parse_qs(qs)
+    @staticmethod
+    def __load_url(url):
+        """
+
+        :type url: str
+        :return: path, query
+        """
+        if '?' in url:
+            path, qs = url.split('?')
+            query = urlparse.parse_qs(qs)
+        else:
+            path = url
+            query = None
 
         return path, query
 
@@ -96,4 +110,3 @@ class RequestHandler(BaseHTTPRequestHandler):
         finally:
             self.wfile.flush()
         return
-

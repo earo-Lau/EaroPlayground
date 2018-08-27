@@ -1,7 +1,5 @@
 import threading
 
-from typing import Dict
-
 
 class FileSaveLocker(object):
     __file_locker = {}  # type: Dict[str, threading.Lock]

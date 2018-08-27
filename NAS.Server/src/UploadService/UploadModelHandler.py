@@ -35,6 +35,9 @@ class UploadModelHandler:
         :type upload_model: UploadModel
         """
         try:
+            if not os.path.exists(self.__temp_path):
+                os.makedirs(self.__temp_path)
+
             f = open('{0}/{1}'.format(self.__temp_path, upload_model.id), 'wb+')
             streaming = upload_model.SerializeToString()
             f.write(streaming)

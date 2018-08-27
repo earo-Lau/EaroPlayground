@@ -1,4 +1,5 @@
 import HttpMiddleware
+from src.APIController.UploadController import UploadController
 from src.APIController.APIRouter import APIRouteTable
 from src.APIController.HelloController import HelloController
 from src.HttpContext import HttpContext
@@ -15,9 +16,11 @@ class ApiMiddleware(HttpMiddleware.HttpMiddleware):
         route_table = self.load_route_table()
         self.route_table = route_table
 
-    def load_route_table(self):
+    @staticmethod
+    def load_route_table():
         route_table = APIRouter.APIRouteTable()
         route_table.registry(APIRouter.Router('hello', HelloController))
+        route_table.registry(APIRouter.Router('upload', UploadController))
         return route_table
 
     def _handle(self, http_context, http_server):

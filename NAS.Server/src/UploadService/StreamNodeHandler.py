@@ -12,8 +12,8 @@ class StreamNodeHandler(object):
 
         :type upload_model: UploadModel
         """
-        count = math.ceil(upload_model.length / 200000)
-        mid = math.floor(count / 2)
+        count = int(math.ceil(upload_model.length / 200000))
+        mid = int(math.floor(count / 2))
         root_node = StreamingNode()
         root_node.id = mid
 
@@ -24,14 +24,16 @@ class StreamNodeHandler(object):
 
     def __create_node(self, root_node, r):
         l = len(r)
-        mid = math.floor(l / 2)
+        mid = int(math.floor(l / 2))
         node = StreamingNode()
         node.id = mid
 
         if mid < root_node.id:
             root_node.left = node
-        else:
+        elif mid > root_node.id:
             root_node.right = node
+        else:
+            return node
 
         self.__create_node(root_node, r[:mid])
         self.__create_node(root_node, r[mid:])

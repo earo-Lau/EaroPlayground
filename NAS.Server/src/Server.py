@@ -40,7 +40,7 @@ def main(port=8073):
     """
     :type port: int
     """
-    server = HTTPServer(('127.0.0.1', port), RequestHandler)
+    server = HTTPServer(('', port), RequestHandler)
     # Load Middleware
     load_middleware(server)
 
