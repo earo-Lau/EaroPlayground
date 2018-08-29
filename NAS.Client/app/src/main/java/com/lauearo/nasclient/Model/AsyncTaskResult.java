@@ -3,29 +3,29 @@ package com.lauearo.nasclient.Model;
 public class AsyncTaskResult<T> {
     //region Field(s)
 
-    private T result;
-    private Exception exception;
+    private T mResult;
+    private Exception mException;
     //endregion
 
 
     //region Properties
     public T getResult() {
-        return result;
+        return mResult;
     }
 
     public Exception getException() {
-        return exception;
+        return mException;
     }
     //endregion
 
     //region Constructor(s)
 
-    public AsyncTaskResult(T result) {
-        this.result = result;
+    public AsyncTaskResult(T mResult) {
+        this.mResult = mResult;
     }
 
     public AsyncTaskResult(Exception exception) {
-        this.exception = exception;
+        this.mException = exception;
     }
     //endregion
 }

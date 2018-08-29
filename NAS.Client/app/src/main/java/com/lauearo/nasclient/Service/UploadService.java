@@ -7,73 +7,98 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.widget.Toast;
-import com.lauearo.nasclient.Provider.IHttpTaskProvider;
-import com.lauearo.nasclient.Provider.ITaskCallBack;
-import com.lauearo.nasclient.Provider.PostProtoBufTask;
+import com.lauearo.nasclient.Model.Constants;
+import com.lauearo.nasclient.Model.UploadingViewModel;
+import com.lauearo.nasclient.Provider.HttpTaskProvider.IHttpTaskProvider;
+import com.lauearo.nasclient.Provider.HttpTaskProvider.ITaskCallBack;
+import com.lauearo.nasclient.Provider.HttpTaskProvider.PostProtoBufTask;
+import com.lauearo.nasclient.Provider.ModelProvider.CacheViewModelProvider;
+import com.lauearo.nasclient.Provider.ModelProvider.IUploadViewModelProvider;
+import com.lauearo.nasclient.R;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class UploadService {
     //endregion
     //region Instance
-    private static UploadService _instance;
+    private static UploadService sInstance;
+    private static HashMap<String, IHttpTaskProvider> sUploadingTask;
+    private IUploadViewModelProvider mUploadModelProvider;
     //region Field(s)
-    private List<UploadModelOuterClass.UploadModel> _uploadList;
 
     //region Constructor(s)
     private UploadService() {
-        _uploadList = new ArrayList<>();
-
+        mUploadModelProvider = CacheViewModelProvider.getInstance();
+        sUploadingTask = new HashMap<>();
     }
 
     //endregion
 
     public static UploadService getInstance() {
-        if (_instance == null) {
-            _instance = new UploadService();
+        if (sInstance == null) {
+            sInstance = new UploadService();
         }
 
-        return _instance;
+        return sInstance;
     }
-
     //endregion
 
     //region Properties
-    public List<UploadModelOuterClass.UploadModel> get_uploadList() {
-        return _uploadList;
-    }
 
-    public void set_uploadList(List<UploadModelOuterClass.UploadModel> _uploadList) {
-        this._uploadList = _uploadList;
+    public List<UploadingViewModel> getUploadingViewModels() {
+        return mUploadModelProvider.getUploadingList();
     }
     //endregion
 
     //region Method(s)
     public void beginUpload(Context ctx, Uri fileUri) throws IOException {
         UploadModelOuterClass.UploadModel uploadModel = buildUploadModel(ctx.getContentResolver(), fileUri);
+        UploadingViewModel vm = mUploadModelProvider.newUploadModel(uploadModel);
 
-        IHttpTaskProvider<UploadModelOuterClass.UploadModel> newUploadTask = new PostProtoBufTask<>("http://192.168.43.117:8073/api/upload/create");
+        IHttpTaskProvider<UploadModelOuterClass.UploadModel> newUploadTask =
+                new PostProtoBufTask<>("http://192.168" + ".43.117:8073/api/upload/create");
+        sUploadingTask.put(uploadModel.getId(), newUploadTask);
 
         newUploadTask.send(uploadModel, new ITaskCallBack<UploadModelOuterClass.UploadModel>() {
             @Override
             public void onSuccess(UploadModelOuterClass.UploadModel entity) {
-                Toast.makeText(ctx, "create success", Toast.LENGTH_SHORT).show();
+                performUpload(ctx, fileUri, vm);
             }
 
             @Override
             public void onFailure(Exception exceptions) {
+                String errMsg = String.format(ctx.getString(R.string.upload_create_failed), uploadModel.getName());
+                Toast.makeText(ctx, errMsg, Toast.LENGTH_LONG).show();
 
+                vm.setStatus(Constants.UPLOADING_STATUS_FAILURE);
             }
 
             @Override
             public void onCancel() {
-
+                mUploadModelProvider.rmUploadModel(uploadModel).cancel();
             }
         });
     }
 
+    private void performUpload(Context ctx, Uri fileUri, UploadingViewModel viewModel) {
+        if (fileUri == null) {
+            Toast.makeText(ctx, String.format(ctx.getString(R.string.content_uri_not_found),
+                    viewModel.getUploadModel().getName()), Toast.LENGTH_LONG).show();
+
+        }
+    }
+
+    public void cancelUpload(UploadingViewModel viewModel) {
+        IHttpTaskProvider taskProvider = sUploadingTask.get(viewModel.getUploadModel().getId());
+
+        if (taskProvider != null) {
+            taskProvider.cancelTask();
+        } else {
+            mUploadModelProvider.rmUploadModel(viewModel.getUploadModel()).cancel();
+        }
+    }
 
     private UploadModelOuterClass.UploadModel buildUploadModel(ContentResolver contentResolver, Uri fileUri) {
         Cursor cursor = contentResolver.query(fileUri, null, null, null, null);

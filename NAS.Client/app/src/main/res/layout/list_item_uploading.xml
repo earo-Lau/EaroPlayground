@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <ImageButton android:id="@+id/list_item_uploading_status_btn"
+                 android:layout_width="60dp"
+                 android:layout_height="60dp"
+                 android:layout_alignParentEnd="true"
+                 android:padding="4dp"
+                 android:background="@android:color/transparent"
+                 tools:text="Upload Status"
+    />
+    <!--<ImageButton android:id="@+id/list_item_uploading_remove_btn"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:padding="4dp"
+                 android:layout_alignParentEnd="true"
+                 android:background="@android:color/transparent"
+                 android:src="@drawable/ic_close_black_24dp"
+    />-->
+
+    <TextView android:id="@+id/list_item_uploading_file_name"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_alignParentStart="true"
+              android:textStyle="bold"
+              android:padding="4dp"
+              tools:text="File Name"
+    />
+
+    <ProgressBar android:id="@+id/list_item_uploading_progress_bar"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_toStartOf="@id/list_item_uploading_status_btn"
+                 android:layout_below="@id/list_item_uploading_file_name"
+                 android:padding="4dp"
+                 tools:text="Uploading progress"
+                 style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+    />
+
+
+</RelativeLayout>

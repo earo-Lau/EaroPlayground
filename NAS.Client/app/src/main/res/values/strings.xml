@@ -2,4 +2,7 @@
     <string name="app_name">NAS.Client</string>
     <string name="main_upload_btn">+</string>
     <string name="title_activity_upload">UploadActivity</string>
+
+    <string name="upload_create_failed">Upload file %s failure </string>
+    <string name="content_uri_not_found">Upload file %s not found</string>
 </resources>

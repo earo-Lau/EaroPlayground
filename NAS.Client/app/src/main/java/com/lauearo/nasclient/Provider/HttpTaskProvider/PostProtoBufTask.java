@@ -1,4 +1,4 @@
-package com.lauearo.nasclient.Provider;
+package com.lauearo.nasclient.Provider.HttpTaskProvider;
 
 import android.os.AsyncTask;
 import com.google.protobuf.GeneratedMessageLite;
@@ -14,12 +14,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<T, Integer, AsyncTaskResult<T>> implements IHttpTaskProvider<T> {
-    private URL _url;
-    private ITaskCallBack<T> _callback;
+    private URL mUrl;
+    private ITaskCallBack<T> mCallback;
 
     //region Constructor(s)
     public PostProtoBufTask(String url) throws MalformedURLException {
-        this._url = new URL(url);
+        this.mUrl = new URL(url);
     }
     //endregion
 
@@ -29,7 +29,7 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
         T entity = objects[0];
 
         try {
-            HttpURLConnection conn = (HttpURLConnection) this._url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) this.mUrl.openConnection();
 
             conn.setDoOutput(true);
             conn.setRequestProperty("content-type", "application/x-protobuf");
@@ -40,7 +40,7 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
 
             InputStream inputStream = conn.getInputStream();
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new IOException(conn.getResponseMessage() + " from " + this._url);
+                throw new IOException(conn.getResponseMessage() + " from " + this.mUrl);
             }
 
             Method parseMethod = entity.getClass().getMethod("parseFrom", InputStream.class);
@@ -56,21 +56,30 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
     @Override
     protected void onPostExecute(AsyncTaskResult<T> result) {
         super.onPostExecute(result);
-        if (this._callback == null) return;
+        if (this.mCallback == null) return;
 
         if (result.getException() != null) {
-            this._callback.onFailure(result.getException());
-        } else if (isCancelled()) {
-            this._callback.onCancel();
+            this.mCallback.onFailure(result.getException());
         } else if (result.getResult() != null) {
-            this._callback.onSuccess(result.getResult());
+            this.mCallback.onSuccess(result.getResult());
         }
     }
 
     @Override
     public void send(T entity, ITaskCallBack<T> callBack) {
-        this._callback = callBack;
+        this.mCallback = callBack;
 
         this.execute(entity);
     }
+
+    @Override
+    protected void onCancelled() {
+        this.mCallback.onCancel();
+    }
+
+    @Override
+    public void cancelTask() {
+        this.cancel(true);
+    }
+
 }
