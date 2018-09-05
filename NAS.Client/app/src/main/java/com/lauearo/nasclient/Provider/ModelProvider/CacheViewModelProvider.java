@@ -26,7 +26,7 @@ public class CacheViewModelProvider implements IUploadViewModelProvider {
             builder.setName("Sample-" + i);
             builder.setLength(r.nextInt());
 
-            newUploadModel(builder.build());
+            newViewModel(builder.build());
         }
     }
     //endregion
@@ -58,7 +58,7 @@ public class CacheViewModelProvider implements IUploadViewModelProvider {
     }
 
     @Override
-    public UploadingViewModel newUploadModel(UploadModelOuterClass.UploadModel uploadModel) {
+    public UploadingViewModel newViewModel(UploadModelOuterClass.UploadModel uploadModel) {
         UploadingViewModel vm = new UploadingViewModel(uploadModel);
         vm.setStatus(Constants.UPLOADING_STATUS_PAUSE);
         vm.setProgress(0);
@@ -67,10 +67,10 @@ public class CacheViewModelProvider implements IUploadViewModelProvider {
         return vm;
     }
 
-    public UploadingViewModel rmUploadModel(UploadModelOuterClass.UploadModel uploadModel) {
+    @Override public UploadingViewModel rmViewModel(String id) {
         UploadingViewModel targetModel = null;
         for (UploadingViewModel model : mUploadList) {
-            if (model.getUploadModel().getId().equalsIgnoreCase(uploadModel.getId())) {
+            if (model.getUploadModel().getId().equalsIgnoreCase(id)) {
                 targetModel = model;
                 break;
             }

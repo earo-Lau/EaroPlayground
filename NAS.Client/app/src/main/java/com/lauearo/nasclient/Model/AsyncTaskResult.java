@@ -5,6 +5,7 @@ public class AsyncTaskResult<T> {
 
     private T mResult;
     private Exception mException;
+    private String mResultString;
     //endregion
 
 
@@ -16,12 +17,19 @@ public class AsyncTaskResult<T> {
     public Exception getException() {
         return mException;
     }
+    public String getResultString() {
+        return mResultString;
+    }
     //endregion
 
     //region Constructor(s)
 
     public AsyncTaskResult(T mResult) {
         this.mResult = mResult;
+    }
+
+    public AsyncTaskResult(String resultString){
+        mResultString = resultString;
     }
 
     public AsyncTaskResult(Exception exception) {

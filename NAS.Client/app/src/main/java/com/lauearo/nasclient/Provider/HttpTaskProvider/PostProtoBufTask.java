@@ -4,28 +4,27 @@ import android.os.AsyncTask;
 import com.google.protobuf.GeneratedMessageLite;
 import com.lauearo.nasclient.Model.AsyncTaskResult;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<T, Integer, AsyncTaskResult<T>> implements IHttpTaskProvider<T> {
+public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<T, Integer, AsyncTaskResult> implements IHttpTaskProvider<T> {
     private URL mUrl;
-    private ITaskCallBack<T> mCallback;
+    private ITaskCallBack mCallback;
 
     //region Constructor(s)
     public PostProtoBufTask(String url) throws MalformedURLException {
         this.mUrl = new URL(url);
     }
-    //endregion
+    //endregio
 
     @SafeVarargs
     @Override
-    protected final AsyncTaskResult<T> doInBackground(T... objects) {
+    protected final AsyncTaskResult doInBackground(T... objects) {
         T entity = objects[0];
 
         try {
@@ -43,25 +42,50 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
                 throw new IOException(conn.getResponseMessage() + " from " + this.mUrl);
             }
 
-            Method parseMethod = entity.getClass().getMethod("parseFrom", InputStream.class);
-            T model = (T) parseMethod.invoke(entity, inputStream);
+            AsyncTaskResult taskResult = readResponse(inputStream);
+            inputStream.close();
 
-            return new AsyncTaskResult<>(model);
-        } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            return taskResult;
+        } catch (IOException e) {
             e.printStackTrace();
-            return new AsyncTaskResult<>(e);
+            return new AsyncTaskResult(e);
+        }
+    }
+
+    private AsyncTaskResult readResponse(InputStream inputStream) throws IOException {
+        Object obj = this.mCallback.onSerializable(inputStream);
+        if (obj != null) {
+            return new AsyncTaskResult(obj);
+        } else {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+
+            return new AsyncTaskResult(result.toString("UTF-8"));
         }
     }
 
     @Override
-    protected void onPostExecute(AsyncTaskResult<T> result) {
+    protected void onPostExecute(AsyncTaskResult result) {
         super.onPostExecute(result);
         if (this.mCallback == null) return;
 
-        if (result.getException() != null) {
+        if (null != result.getException()) {
             this.mCallback.onFailure(result.getException());
-        } else if (result.getResult() != null) {
-            this.mCallback.onSuccess(result.getResult());
+        } else {
+            try {
+                if (null != result.getResult()) {
+                    this.mCallback.onSuccess(result.getResult());
+                } else {
+                    this.mCallback.onSuccess(result.getResultString());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                this.mCallback.onFailure(e);
+            }
         }
     }
 

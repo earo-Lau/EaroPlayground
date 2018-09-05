@@ -4,6 +4,7 @@ public class Constants {
      public static final int ACTION_REQUEST_PICK_FILE = 0;
      public static final String CACHEPATH = "";
 
+     public static final String NAS_SERVER_URL = "http://192.168.43.117:8073";
 
      public static final int UPLOADING_STATUS_PAUSE = 0x01;
      public static final int UPLOADING_STATUS_PLAY = 0x00;

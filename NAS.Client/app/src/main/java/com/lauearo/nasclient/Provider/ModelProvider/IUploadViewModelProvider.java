@@ -9,6 +9,6 @@ public interface IUploadViewModelProvider {
     List<UploadingViewModel> getUploadingList();
     UploadingViewModel getUploadingViewModel(String id);
 
-    UploadingViewModel newUploadModel(UploadModelOuterClass.UploadModel uploadModel);
-    UploadingViewModel rmUploadModel(UploadModelOuterClass.UploadModel uploadModel);
+    UploadingViewModel newViewModel(UploadModelOuterClass.UploadModel uploadModel);
+    UploadingViewModel rmViewModel(String id);
 }

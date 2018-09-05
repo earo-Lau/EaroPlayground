@@ -1,22 +1,23 @@
 package com.lauearo.nasclient.Model;
 
-import NAS.Model.UploadModelOuterClass;
+import android.net.Uri;
 
-import java.util.EventListener;
-import java.util.EventObject;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
+import static NAS.Model.UploadModelOuterClass.UploadModel;
 
 public class UploadingViewModel {
-
-    private UploadModelOuterClass.UploadModel mUploadModel;
+    private UploadModel mUploadModel;
+    private int mTaskId;
     private int mStatus;
-    private int mProgress;
+    private long mProgress;
+    private Uri fileUri;
+
     private List<StatusUpdateEventListener> mStatusUpdateEventListeners;
     private List<ProgressUpdateEventListener> mProgressUpdateEventListeners;
     private List<CancelEventListener> mCancelEventListeners;
 
-    public UploadingViewModel(UploadModelOuterClass.UploadModel uploadModel) {
+    public UploadingViewModel(UploadModel uploadModel) {
         mUploadModel = uploadModel;
 
         mStatusUpdateEventListeners = new LinkedList<>();
@@ -24,9 +25,14 @@ public class UploadingViewModel {
         mCancelEventListeners = new LinkedList<>();
     }
 
-    public UploadModelOuterClass.UploadModel getUploadModel() {
+    public void setUploadModel(UploadModel uploadModel) {
+        mUploadModel = uploadModel;
+    }
+
+    public UploadModel getUploadModel() {
         return mUploadModel;
     }
+
 
     public int getStatus() {
         return mStatus;
@@ -39,11 +45,11 @@ public class UploadingViewModel {
         }
     }
 
-    public int getProgress() {
+    public long getProgress() {
         return mProgress;
     }
 
-    public void setProgress(int progress) {
+    public void setProgress(long progress) {
         mProgress = progress;
         if (mProgressUpdateEventListeners != null) {
             int percentage = Math.round((float) mProgress / mUploadModel.getLength());
@@ -73,6 +79,22 @@ public class UploadingViewModel {
         if (mCancelEventListeners != null) {
             mCancelEventListeners.forEach((action) -> action.onCancelled(new EventObject(this)));
         }
+    }
+
+    public int getTaskId() {
+        return mTaskId;
+    }
+
+    public void setTaskId(int taskId) {
+        mTaskId = taskId;
+    }
+
+    public Uri getFileUri() {
+        return fileUri;
+    }
+
+    public void setFileUri(Uri fileUri) {
+        this.fileUri = fileUri;
     }
 
     public interface StatusUpdateEventListener extends EventListener {

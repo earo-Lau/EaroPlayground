@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
             assert fileUri != null;
 
             try {
-                UploadService.getInstance().beginUpload(this.getBaseContext(), fileUri);
+                UploadService.getInstance().newUpload(this.getBaseContext(), fileUri);
+                onLoadUploadingList();
             } catch (IOException e) {
                 e.printStackTrace();
             }

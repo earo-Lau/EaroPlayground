@@ -5,4 +5,5 @@
 
     <string name="upload_create_failed">Upload file %s failure </string>
     <string name="content_uri_not_found">Upload file %s not found</string>
+    <string name="network_unavailable">Network can not connect to server</string>
 </resources>
