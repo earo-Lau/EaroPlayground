@@ -7,6 +7,8 @@ from src.UploadService.FileSaveLocker import FileSaveLocker
 
 
 class UploadModelHandler:
+    fileSaveLocker = FileSaveLocker()
+
     __signature_key = 'c4cd977a71d4e935a29694ef4a14f9ee6701ac01c67e08c021f623af5d324f31'
     __temp_path = '/tmp/NAS.Server/upload'
     __save_path = '../../upload'
@@ -23,7 +25,8 @@ class UploadModelHandler:
         :rtype: UploadModel
         """
         f = open('{0}/{1}'.format(self.__temp_path, upload_model_id), 'rb')
-        upload_model = UploadModel.ParseFromString(f.read())
+        upload_model = UploadModel()
+        upload_model.ParseFromString(f.read())
         f.close()
 
         return upload_model
@@ -79,7 +82,7 @@ class UploadModelHandler:
             raise e
 
         os.remove('{0}/{1}'.format(self.__temp_path, temp_file.id))
-        destroy_locker(temp_file.id)
+        self.fileSaveLocker.destroy_locker(temp_file.id)
 
     def __traversal_node(self, root, f):
         if not root:

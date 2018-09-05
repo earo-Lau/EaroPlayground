@@ -4,13 +4,13 @@ from google.protobuf.message import Message
 
 from src.Model.UploadModel_pb2 import UploadModel, StreamingNode
 from src.APIController.BaseAPIController import BaseAPIController
-from src.UploadService.FileSaveLocker import FileSaveLocker
 from src.UploadService.StreamNodeHandler import StreamNodeHandler
 from src.UploadService.UploadModelHandler import UploadModelHandler
 
 
 # noinspection PyBroadException
 class UploadController(BaseAPIController):
+
     def __init__(self, http_context, http_server):
         super(UploadController, self).__init__(http_context, http_server)
         self.__upload_model_handler = UploadModelHandler()
@@ -34,14 +34,15 @@ class UploadController(BaseAPIController):
 
         return
 
-    def steam(self):
+    def stream(self):
         body = self._http_context.request.body
-        streaming_node = StreamingNode.ParseFromString(body)  # type: StreamingNode
+        streaming_node = StreamingNode()
+        streaming_node.ParseFromString(body)  # type: StreamingNode
 
-        f_locker = FileSaveLocker.get_locker(streaming_node.upload_model)
+        f_locker = UploadModelHandler.fileSaveLocker.get_locker(streaming_node.upload_modle)
         f_locker.acquire()
 
-        source_model = self.__upload_model_handler.get_temp_file(streaming_node.upload_model)
+        source_model = self.__upload_model_handler.get_temp_file(streaming_node.upload_modle)
         if not source_model:
             f_locker.release()
             self._http_server.send_error(500, 'source file not found')
@@ -60,13 +61,15 @@ class UploadController(BaseAPIController):
 
     def done(self):
         body = self._http_context.request.body
+        upload_model = UploadModel()
+        upload_model.ParseFromString(body)
 
         try:
-            temp_file = self.__upload_model_handler.get_temp_file(body.id)  # type: UploadModel
+            temp_file = self.__upload_model_handler.get_temp_file(upload_model.id)  # type: UploadModel
             UploadModelHandler.save_file(temp_file)
 
         except (IOError, IndexError, OverflowError, KeyError):
-            logging.error('Save file %s error', temp_file.name, exc_info=True)
+            logging.error('Save file (%s) error', upload_model.name, exc_info=True)
             self._http_server.send_error(500, 'save file {0} error'.format(temp_file.name))
 
         self._ok('ok')
