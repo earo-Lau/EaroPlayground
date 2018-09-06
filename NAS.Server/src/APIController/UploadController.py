@@ -1,9 +1,7 @@
 import logging
 
-from google.protobuf.message import Message
-
-from src.Model.UploadModel_pb2 import UploadModel, StreamingNode
 from src.APIController.BaseAPIController import BaseAPIController
+from src.Model.UploadModel_pb2 import UploadModel, StreamingNode
 from src.UploadService.StreamNodeHandler import StreamNodeHandler
 from src.UploadService.UploadModelHandler import UploadModelHandler
 
@@ -63,11 +61,10 @@ class UploadController(BaseAPIController):
         body = self._http_context.request.body
         upload_model = UploadModel()
         upload_model.ParseFromString(body)
+        temp_file = self.__upload_model_handler.get_temp_file(upload_model.id)  # type: UploadModel
 
         try:
-            temp_file = self.__upload_model_handler.get_temp_file(upload_model.id)  # type: UploadModel
-            UploadModelHandler.save_file(temp_file)
-
+            self.__upload_model_handler.save_file(temp_file)
         except (IOError, IndexError, OverflowError, KeyError):
             logging.error('Save file (%s) error', upload_model.name, exc_info=True)
             self._http_server.send_error(500, 'save file {0} error'.format(temp_file.name))
