@@ -12,7 +12,8 @@
                  android:padding="4dp"
                  android:background="@android:color/transparent"
                  tools:text="Upload Status"
-    />
+                 android:contentDescription="@string/upload_status_btn_desc"/>
+
     <!--<ImageButton android:id="@+id/list_item_uploading_remove_btn"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"

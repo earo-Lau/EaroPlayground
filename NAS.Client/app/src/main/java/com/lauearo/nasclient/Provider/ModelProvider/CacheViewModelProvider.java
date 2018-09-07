@@ -17,7 +17,7 @@ import static NAS.Model.UploadModelOuterClass.UploadModel;
 public class CacheViewModelProvider implements IUploadViewModelProvider {
     //region Singleton
     private static CacheViewModelProvider sInstance;
-    private List<UploadingViewModel> mUploadList;
+    private final List<UploadingViewModel> mUploadList;
 
     //region Constructor(s)
     private CacheViewModelProvider() {

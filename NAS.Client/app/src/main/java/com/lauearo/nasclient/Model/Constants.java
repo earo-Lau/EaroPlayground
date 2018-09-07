@@ -1,12 +1,12 @@
 package com.lauearo.nasclient.Model;
 
+@SuppressWarnings("WeakerAccess")
 public class Constants {
     public static final int ACTION_REQUEST_PICK_FILE = 0;
     public static final String ACTION_NEW = "action.new";
     public static final String ACTION_CANCEL = "action.cancel";
     public static final String ACTION_DONE = "action.done";
     public static final String ACTION_FAILED = "action.failed";
-    public static final String CACHEPATH = "";
 
     public static final String NAS_SERVER_URL = "http://192.168.43.117:8073";
 

@@ -6,6 +6,7 @@ import com.lauearo.nasclient.Model.UploadingViewModel;
 
 import java.util.List;
 
+@SuppressWarnings("UnusedReturnValue")
 public interface IUploadViewModelProvider {
     List<UploadingViewModel> getUploadingList();
 

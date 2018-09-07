@@ -36,7 +36,7 @@ import static NAS.Model.UploadModelOuterClass.StreamingNode;
 
 public class StreamingService extends IntentService {
     private static final String TAG = "StreamingService";
-    private IUploadViewModelProvider mViewModelProvider;
+    private final IUploadViewModelProvider mViewModelProvider;
 
     public StreamingService() {
         super(TAG);
@@ -144,7 +144,7 @@ public class StreamingService extends IntentService {
 
     private class StreamWorker implements Subscriber<StreamingNode> {
         Subscription mSubscription;
-        UploadingViewModel mViewModel;
+        final UploadingViewModel mViewModel;
         int mRunning = 0;
 
         StreamWorker(UploadingViewModel viewModel) {
@@ -213,6 +213,7 @@ public class StreamingService extends IntentService {
 
                 byte[] chunkStream = new byte[200000];
                 int offset = streamingNode.getId() * 200000;
+                //noinspection ResultOfMethodCallIgnored
                 inputStream.skip(offset);
                 int len = inputStream.read(chunkStream);
                 ByteString byteString = ByteString.copyFrom(chunkStream, 0, len);

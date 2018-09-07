@@ -60,12 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStop() {
-
-        super.onStop();
-    }
-
     private void registerReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION_NEW);
@@ -76,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String intentAction = intent.getAction();
-                Log.d(".MainActivity.BroadcastReceiver", String.format("received message %s", intentAction));
+                Log.d(".BroadcastReceiver", String.format("received message %s", intentAction));
                 if (Constants.ACTION_DONE.equalsIgnoreCase(intentAction)) {
                     String id = intent.getStringExtra("id");
                     mViewModelProvider.rmViewModel(id);
@@ -99,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == Constants.ACTION_REQUEST_PICK_FILE) {
             final Uri fileUri = data.getData();
             assert fileUri != null;
-            CacheViewModelProvider.getInstance().newUpload(getContentResolver(), fileUri);
+            mViewModelProvider.newUpload(getContentResolver(), fileUri);
 
             Intent uploadService = UploadService.newIntent(getApplicationContext());
             startService(uploadService);
@@ -113,11 +107,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class UploadingHolder extends RecyclerView.ViewHolder {
-        private TextView mFileNameTextView;
-        private ProgressBar mUploadingProgressBar;
-        private ImageButton mUploadingStatusBtn;
+        private final TextView mFileNameTextView;
+        private final ProgressBar mUploadingProgressBar;
+        private final ImageButton mUploadingStatusBtn;
 
-        private View mView;
+        private final View mView;
         private MenuItem.OnMenuItemClickListener mRemoveMenuItemListener;
 
 

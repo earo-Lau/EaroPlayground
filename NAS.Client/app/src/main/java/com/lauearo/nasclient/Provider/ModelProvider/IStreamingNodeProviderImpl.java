@@ -7,7 +7,7 @@ import java.util.Queue;
 
 public class IStreamingNodeProviderImpl implements IStreamingNodeProvider {
     private Queue<StreamingNode> iterator;
-    private StreamingNode mRoot;
+    private final StreamingNode mRoot;
 
     public IStreamingNodeProviderImpl(StreamingNode root) {
         this.mRoot = root;

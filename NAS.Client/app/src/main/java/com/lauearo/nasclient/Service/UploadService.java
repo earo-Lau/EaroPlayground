@@ -23,7 +23,7 @@ public class UploadService extends IntentService {
     private static final String TAG = "UploadService";
 
     //region Field(s)
-    private IUploadViewModelProvider mUploadModelProvider;
+    private final IUploadViewModelProvider mUploadModelProvider;
     //endregion
 
     //region Constructor(s)

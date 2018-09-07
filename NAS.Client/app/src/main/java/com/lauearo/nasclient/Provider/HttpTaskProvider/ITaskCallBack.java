@@ -8,7 +8,7 @@ public interface ITaskCallBack<T> {
         return null;
     }
 
-    default void onSuccess(T entity) {
+    default void onSuccess(@SuppressWarnings("unused")T entity) {
         throw new ClassCastException();
     }
 
@@ -16,7 +16,7 @@ public interface ITaskCallBack<T> {
         
     }
 
-    default void onFailure(Exception exceptions) {
+    default void onFailure(@SuppressWarnings("unused") Exception exceptions) {
     }
 
     default void onCancel() {

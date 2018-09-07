@@ -15,9 +15,9 @@ public class UploadingViewModel {
     private long mProgress;
     private Uri fileUri;
 
-    private List<StatusUpdateEventListener> mStatusUpdateEventListeners;
-    private List<ProgressUpdateEventListener> mProgressUpdateEventListeners;
-    private List<CancelEventListener> mCancelEventListeners;
+    private final List<StatusUpdateEventListener> mStatusUpdateEventListeners;
+    private final List<ProgressUpdateEventListener> mProgressUpdateEventListeners;
+    private final List<CancelEventListener> mCancelEventListeners;
 
     public UploadingViewModel(UploadModel uploadModel) {
         mUploadModel = uploadModel;
@@ -41,18 +41,19 @@ public class UploadingViewModel {
 
     public void setStatus(int status) {
         mStatus = status;
-        if (mStatusUpdateEventListeners != null) {
+        if (!mStatusUpdateEventListeners.isEmpty()) {
             mStatusUpdateEventListeners.forEach((action) -> action.onUpdate(this.getStatus(), new EventObject(this)));
         }
     }
 
+    @SuppressWarnings("unused")
     public long getProgress() {
         return mProgress;
     }
 
     public void setProgress(long progress) {
         mProgress += progress;
-        if (mProgressUpdateEventListeners != null) {
+        if (!mProgressUpdateEventListeners.isEmpty()) {
             int percentage = Math.round(mProgress * 100.0f / mUploadModel.getLength());
             mProgressUpdateEventListeners.forEach((action) -> action.onUpdate(percentage, new EventObject(this)));
         }
@@ -83,7 +84,7 @@ public class UploadingViewModel {
     public void cancel() {
         setStatus(Constants.UPLOADING_STATUS_CANCEL);
 
-        if (mCancelEventListeners != null) {
+        if (!mCancelEventListeners.isEmpty()) {
             mCancelEventListeners.forEach((action) -> action.onCancelled(new EventObject(this)));
         }
     }

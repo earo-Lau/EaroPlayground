@@ -20,7 +20,7 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
     public PostProtoBufTask(String url) throws MalformedURLException {
         this.mUrl = new URL(url);
     }
-    //endregio
+    //endregion
 
     @SafeVarargs
     @Override
@@ -55,6 +55,7 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
     private AsyncTaskResult readResponse(InputStream inputStream) throws IOException {
         Object obj = this.mCallback.onSerializable(inputStream);
         if (obj != null) {
+            //noinspection unchecked
             return new AsyncTaskResult(obj);
         } else {
             ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -78,6 +79,7 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
         } else if (!this.isCancelled()) {
             try {
                 if (null != result.getResult()) {
+                    //noinspection unchecked
                     this.mCallback.onSuccess(result.getResult());
                 } else {
                     this.mCallback.onSuccess(result.getResultString());
@@ -93,7 +95,8 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
     public void send(T entity, ITaskCallBack<T> callBack) {
         this.mCallback = callBack;
 
-        this.execute(entity);
+        //noinspection unchecked
+        execute(entity);
     }
 
     @Override
