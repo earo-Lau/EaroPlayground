@@ -16,6 +16,20 @@ public class IStreamingNodeProviderImpl implements IStreamingNodeProvider {
 
 
     @Override
+    public long size() {
+        if (mRoot == null) {
+            return 0;
+        }
+
+        StreamingNode cur = mRoot;
+        while (cur.hasRight()) {
+            cur = cur.getRight();
+        }
+
+        return cur.getId() + 1;
+    }
+
+    @Override
     public void reset() {
         iterator = new LinkedList<>();
 

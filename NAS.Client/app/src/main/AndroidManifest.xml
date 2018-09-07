@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <service android:name=".Service.UploadService" tools:ignore="InnerclassSeparator"/>
+        <service android:name=".Service.StreamingService" tools:ignore="InnerclassSeparator"/>
     </application>
 
 </manifest>

@@ -75,7 +75,7 @@ public class PostProtoBufTask<T extends GeneratedMessageLite> extends AsyncTask<
 
         if (null != result.getException()) {
             this.mCallback.onFailure(result.getException());
-        } else {
+        } else if (!this.isCancelled()) {
             try {
                 if (null != result.getResult()) {
                     this.mCallback.onSuccess(result.getResult());

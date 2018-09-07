@@ -2,13 +2,15 @@ package com.lauearo.nasclient.Model;
 
 import android.net.Uri;
 
-import java.util.*;
+import java.util.EventListener;
+import java.util.EventObject;
+import java.util.LinkedList;
+import java.util.List;
 
 import static NAS.Model.UploadModelOuterClass.UploadModel;
 
 public class UploadingViewModel {
     private UploadModel mUploadModel;
-    private int mTaskId;
     private int mStatus;
     private long mProgress;
     private Uri fileUri;
@@ -25,14 +27,13 @@ public class UploadingViewModel {
         mCancelEventListeners = new LinkedList<>();
     }
 
-    public void setUploadModel(UploadModel uploadModel) {
-        mUploadModel = uploadModel;
-    }
-
     public UploadModel getUploadModel() {
         return mUploadModel;
     }
 
+    public void setUploadModel(UploadModel uploadModel) {
+        mUploadModel = uploadModel;
+    }
 
     public int getStatus() {
         return mStatus;
@@ -50,9 +51,9 @@ public class UploadingViewModel {
     }
 
     public void setProgress(long progress) {
-        mProgress = progress;
+        mProgress += progress;
         if (mProgressUpdateEventListeners != null) {
-            int percentage = Math.round((float) mProgress / mUploadModel.getLength());
+            int percentage = Math.round(mProgress * 100.0f / mUploadModel.getLength());
             mProgressUpdateEventListeners.forEach((action) -> action.onUpdate(percentage, new EventObject(this)));
         }
     }
@@ -75,18 +76,16 @@ public class UploadingViewModel {
         }
     }
 
+    public void rmCancelEventListener(CancelEventListener listener) {
+        mCancelEventListeners.remove(listener);
+    }
+
     public void cancel() {
+        setStatus(Constants.UPLOADING_STATUS_CANCEL);
+
         if (mCancelEventListeners != null) {
             mCancelEventListeners.forEach((action) -> action.onCancelled(new EventObject(this)));
         }
-    }
-
-    public int getTaskId() {
-        return mTaskId;
-    }
-
-    public void setTaskId(int taskId) {
-        mTaskId = taskId;
     }
 
     public Uri getFileUri() {

@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="NAS.Client.Widget.ProgressBar" parent="android:Widget.Material.ProgressBar.Horizontal">
+        <item name="colorAccent">@color/colorProgress</item>
+    </style>
+
 </resources>

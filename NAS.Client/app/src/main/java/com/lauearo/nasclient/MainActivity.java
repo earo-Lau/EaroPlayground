@@ -1,6 +1,9 @@
 package com.lauearo.nasclient;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,18 +21,29 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.lauearo.nasclient.Model.Constants;
 import com.lauearo.nasclient.Model.UploadingViewModel;
+import com.lauearo.nasclient.Provider.ModelProvider.CacheViewModelProvider;
+import com.lauearo.nasclient.Provider.ModelProvider.IUploadViewModelProvider;
 import com.lauearo.nasclient.Service.UploadService;
-
-import java.io.IOException;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView mUploadingRecyclerView;
+    private IUploadViewModelProvider mViewModelProvider;
+    private BroadcastReceiver mBroadcastReceiver;
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mBroadcastReceiver);
+
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        registerReceiver();
+
+        mViewModelProvider = CacheViewModelProvider.getInstance();
 
         mUploadingRecyclerView = findViewById(R.id.uploading_recycler_view);
         mUploadingRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -42,6 +57,36 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(Intent.createChooser(chooseIntent, "Select File"),
                     Constants.ACTION_REQUEST_PICK_FILE);
         });
+
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+    }
+
+    private void registerReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.ACTION_NEW);
+        filter.addAction(Constants.ACTION_CANCEL);
+        filter.addAction(Constants.ACTION_DONE);
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String intentAction = intent.getAction();
+                Log.d(".MainActivity.BroadcastReceiver", String.format("received message %s", intentAction));
+                if (Constants.ACTION_DONE.equalsIgnoreCase(intentAction)) {
+                    String id = intent.getStringExtra("id");
+                    mViewModelProvider.rmViewModel(id);
+
+                    onLoadUploadingList();
+                }
+            }
+        };
+
+        registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
@@ -54,13 +99,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == Constants.ACTION_REQUEST_PICK_FILE) {
             final Uri fileUri = data.getData();
             assert fileUri != null;
+            CacheViewModelProvider.getInstance().newUpload(getContentResolver(), fileUri);
 
-            try {
-                UploadService.getInstance().newUpload(this.getBaseContext(), fileUri);
-                onLoadUploadingList();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Intent uploadService = UploadService.newIntent(getApplicationContext());
+            startService(uploadService);
+            onLoadUploadingList();
         }
     }
 
@@ -77,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         private View mView;
         private MenuItem.OnMenuItemClickListener mRemoveMenuItemListener;
 
+
         UploadingHolder(View itemView) {
             super(itemView);
 
@@ -86,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
             mUploadingStatusBtn = itemView.findViewById(R.id.list_item_uploading_status_btn);
 
             mUploadingProgressBar.setMax(100);
+//            mUploadingProgressBar.setProgress(50);
 
             itemView.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
                 MenuItem removeMenuItem = menu.add(0, v.getId(), 0, "Remove");
@@ -124,11 +169,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class UploadingAdaptor extends RecyclerView.Adapter<UploadingHolder> {
-        private List<UploadingViewModel> mUploadModelList;
-
-        UploadingAdaptor() {
-            mUploadModelList = UploadService.getInstance().getUploadingViewModels();
-        }
 
         @NonNull
         @Override
@@ -141,17 +181,19 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull UploadingHolder holder, int position) {
-            UploadingViewModel uploadingVM = mUploadModelList.get(position);
+            UploadingViewModel uploadingVM = mViewModelProvider.getUploadingList().get(position);
             uploadingVM.addStatusUpdateEventListener((status, e) -> holder.updateStatus(status));
             uploadingVM.addProgressUpdateEventListener((progress, e) -> holder.updateProgress(progress));
-            uploadingVM.addCancelEventListeners((e -> onLoadUploadingList()));
 
             holder.setItemClickListener((v) -> {
                 int currentStatus = uploadingVM.getStatus();
                 uploadingVM.setStatus(Constants.UPLOADING_STATUS_PAUSE ^ currentStatus);
             });
             holder.setRemoveMenuItemClickListener(item -> {
-                UploadService.getInstance().cancelUpload(uploadingVM);
+                uploadingVM.cancel();
+
+                mViewModelProvider.rmViewModel(uploadingVM.getUploadModel().getId());
+                onLoadUploadingList();
 
                 return true;
             });
@@ -161,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return mUploadModelList.size();
+            return mViewModelProvider.getUploadingList().size();
         }
     }
 

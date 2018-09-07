@@ -38,8 +38,9 @@
                  android:layout_below="@id/list_item_uploading_file_name"
                  android:padding="4dp"
                  tools:text="Uploading progress"
-                 style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
-    />
+                 android:indeterminateTint="@color/colorProgress"
+                 android:theme="@style/NAS.Client.Widget.ProgressBar"
+                 style="@style/NAS.Client.Widget.ProgressBar"/>
 
 
 </RelativeLayout>
