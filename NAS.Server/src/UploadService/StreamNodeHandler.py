@@ -12,28 +12,50 @@ class StreamNodeHandler(object):
 
         :type upload_model: UploadModel
         """
-        count = int(math.ceil(upload_model.length / 200000))
+        count = int(math.ceil(upload_model.length / 200000.0))
         mid = int(math.floor(count / 2))
         root_node = StreamingNode()
         root_node.id = mid
 
-        self.__create_node(root_node, range(0, mid))
-        self.__create_node(root_node, range(mid + 1, count))
+        left_node = self.__create_node(range(0, mid))
+        right_node = self.__create_node(range(mid + 1, count))
+        if left_node:
+            root_node.left.CopyFrom(left_node)
+        if right_node:
+            root_node.right.CopyFrom(right_node)
 
         return root_node
 
-    def __create_node(self, root_node, r):
-        l = len(r)
-        mid = int(math.floor(l / 2))
+    def __create_node(self, r):
+        length = len(r)
+        if length == 0:
+            return None
+
+        mid = int(math.floor(length / 2))
         node = StreamingNode()
-        node.id = mid
+        node.id = r[mid]
 
-        if mid < root_node.id:
-            root_node.left = node
-        elif mid > root_node.id:
-            root_node.right = node
+        if length > 3:
+            left_node = self.__create_node(r[:mid])
+            right_node = self.__create_node(r[mid + 1:])
+        elif length == 3:
+            left_node = StreamingNode()
+            left_node.id = r[mid - 1]
+
+            right_node = StreamingNode()
+            right_node.id = r[mid + 1]
+        elif length == 2:
+            left_node = StreamingNode()
+            left_node.id = r[mid - 1]
+
+            right_node = None
         else:
-            return node
+            left_node = None
+            right_node = None
 
-        self.__create_node(root_node, r[:mid])
-        self.__create_node(root_node, r[mid:])
+        if left_node:
+            node.left.CopyFrom(left_node)
+        if right_node:
+            node.right.CopyFrom(right_node)
+
+        return node

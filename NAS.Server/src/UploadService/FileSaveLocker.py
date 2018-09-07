@@ -12,7 +12,7 @@ class FileSaveLocker(object):
             return self.__file_locker[file_id]
 
         locker = threading.Lock()
-        self.__file_locker = locker
+        self.__file_locker[file_id] = locker
         self.__atom.release()
         return locker
 

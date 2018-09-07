@@ -11,7 +11,7 @@ class UploadModelHandler:
 
     __signature_key = 'c4cd977a71d4e935a29694ef4a14f9ee6701ac01c67e08c021f623af5d324f31'
     __temp_path = '/tmp/NAS.Server/upload'
-    __save_path = '../../upload'
+    __save_path = '../upload'
 
     def __init__(self):
         pass
@@ -74,7 +74,8 @@ class UploadModelHandler:
     def save_file(self, temp_file):
         root = temp_file.root
         try:
-            f = open('{0}/{1}'.format(self.__save_path, temp_file.name), 'wb+')
+            abs_path = os.path.abspath(self.__save_path)
+            f = open('{0}/{1}'.format(abs_path, temp_file.name), 'w+')
             self.__traversal_node(root, f)
             f.close()
         except IOError, e:
@@ -88,9 +89,9 @@ class UploadModelHandler:
         if not root:
             return None
 
-        if root.left:
+        if root.HasField('left'):
             self.__traversal_node(root.left, f)
         f.write(root.stream)
 
-        if root.right:
+        if root.HasField('right'):
             self.__traversal_node(root.right, f)
