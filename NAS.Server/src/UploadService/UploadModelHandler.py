@@ -75,7 +75,10 @@ class UploadModelHandler:
         root = temp_file.root
         try:
             abs_path = os.path.abspath(self.__save_path)
-            f = open('{0}/{1}'.format(abs_path, temp_file.name), 'w+')
+            file_path = '{0}/{1}'.format(abs_path, temp_file.id)
+            print('save file to {0}'.format(file_path))
+
+            f = open(file_path, 'w+')
             self.__traversal_node(root, f)
             f.close()
         except IOError, e:

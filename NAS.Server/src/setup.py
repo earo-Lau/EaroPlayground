@@ -2,9 +2,9 @@ from setuptools import setup
 
 setup(
     name='NAS.Server',
-    version='Beta 0.1',
+    version='',
     packages=['', 'Model', 'APIController', 'UploadService', 'HttpMiddleware'],
-    package_dir={'': 'src'},
+    package_dir={'': '/Users/lauearo/Projects/NAS/NAS.Server/src'},
     url='',
     license='',
     author='lauearo',
