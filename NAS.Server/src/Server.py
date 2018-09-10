@@ -59,7 +59,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     server = main(args.port)
     try:
-        user_input = input()
+        user_input = raw_input('press ctrl+c to stop...\n')
     except KeyboardInterrupt:
         server.shutdown()
         exit()
