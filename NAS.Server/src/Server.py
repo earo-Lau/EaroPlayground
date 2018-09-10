@@ -57,4 +57,9 @@ if __name__ == '__main__':
     parser = get_parser()
 
     args = parser.parse_args()
-    main(args.port)
+    server = main(args.port)
+    try:
+        user_input = input()
+    except KeyboardInterrupt:
+        server.shutdown()
+        exit()
