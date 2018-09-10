@@ -1,5 +1,7 @@
 import sys
 import logging
+import thread
+import threading
 from BaseHTTPServer import HTTPServer as HTTPServer
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
@@ -44,10 +46,11 @@ def main(port=8073):
     # Load Middleware
     load_middleware(server)
 
-    #
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.start()
+    logging.info('Server is Setup to port: %s\n', port)
 
-    server.serve_forever()
-    logging.info('Server is Setup to port:{0}', port)
+    return server
 
 
 if __name__ == '__main__':

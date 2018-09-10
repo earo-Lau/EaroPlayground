@@ -8,7 +8,7 @@ public class Constants {
     public static final String ACTION_DONE = "action.done";
     public static final String ACTION_FAILED = "action.failed";
 
-    public static final String NAS_SERVER_URL = "http://192.168.1.103:8073";
+    public static final String NAS_SERVER_URL = "http://192.168.1.199:8073";
 
     public static final int UPLOADING_STATUS_PENDING = 0x00;
     public static final int UPLOADING_STATUS_PAUSE = 0x01;
