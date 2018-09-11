@@ -23,7 +23,10 @@ import com.lauearo.nasclient.Model.Constants;
 import com.lauearo.nasclient.Model.UploadingViewModel;
 import com.lauearo.nasclient.Provider.ModelProvider.CacheViewModelProvider;
 import com.lauearo.nasclient.Provider.ModelProvider.IUploadViewModelProvider;
+import com.lauearo.nasclient.Service.StreamingService;
 import com.lauearo.nasclient.Service.UploadService;
+
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView mUploadingRecyclerView;
@@ -70,7 +73,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String intentAction = intent.getAction();
-                Log.d(".BroadcastReceiver", String.format("received message %s", intentAction));
+                Date date = new Date();
+                Log.d(".BroadcastReceiver", String.format("received message %s at %s", intentAction, date.toString()));
+
                 if (Constants.ACTION_DONE.equalsIgnoreCase(intentAction)) {
                     String id = intent.getStringExtra("id");
                     mViewModelProvider.rmViewModel(id);
@@ -181,7 +186,14 @@ public class MainActivity extends AppCompatActivity {
 
             holder.setItemClickListener((v) -> {
                 int currentStatus = uploadingVM.getStatus();
-                uploadingVM.setStatus(Constants.UPLOADING_STATUS_PAUSE ^ currentStatus);
+                if (currentStatus == Constants.UPLOADING_STATUS_PLAY) {
+                    uploadingVM.setStatus(Constants.UPLOADING_STATUS_PAUSE);
+                } else {
+                    uploadingVM.setStatus(Constants.UPLOADING_STATUS_PLAY);
+                }
+                Intent streamIntent = StreamingService.newIntent(getApplicationContext());
+                streamIntent.putExtra("id", uploadingVM.getUploadModel().getId());
+                startService(streamIntent);
             });
             holder.setRemoveMenuItemClickListener(item -> {
                 uploadingVM.cancel();

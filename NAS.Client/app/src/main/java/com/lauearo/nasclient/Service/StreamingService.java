@@ -31,6 +31,7 @@ import org.reactivestreams.Subscription;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static NAS.Model.UploadModelOuterClass.StreamingNode;
 
@@ -43,7 +44,7 @@ public class StreamingService extends IntentService {
         mViewModelProvider = CacheViewModelProvider.getInstance();
     }
 
-    static Intent newIntent(Context context) {
+    public static Intent newIntent(Context context) {
         return new Intent(context, StreamingService.class);
     }
 
@@ -54,6 +55,7 @@ public class StreamingService extends IntentService {
         UploadingViewModel viewModel = mViewModelProvider.getUploadingViewModel(id);
 
         Observable.fromArray(viewModel)
+                  .observeOn(Schedulers.newThread())
                   .subscribe(new Observer<UploadingViewModel>() {
                       @Override
                       public void onSubscribe(Disposable d) {
@@ -62,7 +64,6 @@ public class StreamingService extends IntentService {
 
                       @Override
                       public void onNext(UploadingViewModel viewModel) {
-
                           if (viewModel.getStatus() != Constants.UPLOADING_STATUS_PLAY) {
                               return;
                           }
@@ -71,8 +72,8 @@ public class StreamingService extends IntentService {
 
                           Log.i(TAG, String.format(">>>>>>>>>>>>> Earo say begin stream model: %s",
                                   viewModel.getUploadModel().getName()));
-                          Flowable<StreamingNode> f = Flowable.create(emitter -> {
 
+                          Flowable<StreamingNode> f = Flowable.create(emitter -> {
                               boolean flag;
                               while (nodeProvider.hasNext()) {
                                   if (emitter.isCancelled()) {
@@ -86,10 +87,17 @@ public class StreamingService extends IntentService {
                                       }
                                   }
 
-                                  emitter.onNext(nodeProvider.next());
+                                  StreamingNode node = nodeProvider.next();
+                                  int id = node.getId();
+                                  byte[] progress = viewModel.getUploadModel().getProgress().toByteArray();
+
+                                  //skip if progress mark as done
+                                  if (progress.length > 0 && progress[id] != 1) {
+                                      emitter.onNext(node);
+                                  }
                               }
 
-//                              emitter.onComplete();
+                              emitter.onComplete();
                           }, BackpressureStrategy.BUFFER);
 
                           StreamWorker worker = new StreamWorker(viewModel);
@@ -97,7 +105,7 @@ public class StreamingService extends IntentService {
                            .observeOn(AndroidSchedulers.mainThread())
                            .subscribe(worker);
 
-                          worker.onRequired(nodeProvider.size());
+                          worker.onRequired();
                       }
 
                       @Override
@@ -143,49 +151,57 @@ public class StreamingService extends IntentService {
 
 
     private class StreamWorker implements Subscriber<StreamingNode> {
-        Subscription mSubscription;
         final UploadingViewModel mViewModel;
+        Subscription mSubscription;
         int mRunning = 0;
+        boolean mStopRequest = false;
 
         StreamWorker(UploadingViewModel viewModel) {
             mViewModel = viewModel;
         }
 
-        void onRequired(long size) {
-            final long oSize = size;
+        void onRequired() {
             new Thread(() -> {
-                long i = 0;
                 synchronized (StreamWorker.this) {
                     do {
                         if (mViewModel.getStatus() != Constants.UPLOADING_STATUS_PLAY) return;
 
-                        if (mRunning < 10) {
-                            mSubscription.request(1);
-                            i++;
-                            mRunning++;
-                        } else {
-                            try {
-                                StreamWorker.this.wait(3000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                        try {
+                            if (mRunning < 10) {
+                                mSubscription.request(1);
+                                mRunning += ((AtomicInteger) mSubscription).get();
                             }
+                            StreamWorker.this.wait(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-                    } while (i < oSize);
+                    } while (!mStopRequest);
                 }
 
-                while (mRunning != 0) {
-                    Log.i(TAG, String.format(">>>>>>>>>>>>>>>> Earo say mRunning before done: %s", mRunning));
-
+                synchronized (StreamWorker.this) {
                     try {
-                        Thread.sleep(5000);
+                        while (mRunning > 0) {
+                            if (mViewModel.getStatus() != Constants.UPLOADING_STATUS_PLAY) {
+                                Log.i(TAG, String.format(">>>>>>>>>>>>>>>> Earo say stop upload stream %s",
+                                        mViewModel.getUploadModel().getName()));
+
+                                mSubscription.cancel();
+                                return;
+                            }
+
+                            Log.i(TAG, String.format(">>>>>>>>>>>>>>>> Earo say mRunning before done: %s", mRunning));
+
+                            StreamWorker.this.wait(5000);
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
 
                 if (mViewModel.getStatus() == Constants.UPLOADING_STATUS_PLAY) {
-                    onComplete();
+                    uploadDone(mViewModel);
                 }
+
             }).run();
         }
 
@@ -198,11 +214,11 @@ public class StreamingService extends IntentService {
         @Override
         public void onNext(StreamingNode streamingNode) {
             if (mViewModel.getStatus() != Constants.UPLOADING_STATUS_PLAY) {
-                mSubscription.cancel();
+                if (mViewModel.getStatus() == Constants.UPLOADING_STATUS_CANCEL)
+                    mSubscription.cancel();
 
                 return;
             }
-
 
             Log.i(TAG, String.format(">>>>>>>>>>>>> Earo say begin to stream node: %s",
                     streamingNode.getId()));
@@ -243,6 +259,16 @@ public class StreamingService extends IntentService {
                                 Log.i(TAG, String.format(">>>>>>>>>>>>> Earo say streaming success " +
                                                 "%s",
                                         streamingNode.getId()));
+                                // update progress by node id
+                                byte[] progress = mViewModel.getUploadModel().getProgress().toByteArray();
+                                progress[streamingNode.getId()] = 1;
+
+                                UploadModel nUploadModel = mViewModel.getUploadModel()
+                                                                     .toBuilder()
+                                                                     .setProgress(ByteString.copyFrom(progress))
+                                                                     .build();
+
+                                mViewModel.setUploadModel(nUploadModel);
                             }
                             mViewModel.rmCancelEventListener(cancelEventListener);
                             StreamWorker.this.notify();
@@ -254,6 +280,8 @@ public class StreamingService extends IntentService {
                         synchronized (StreamWorker.this) {
                             mViewModel.setStatus(Constants.UPLOADING_STATUS_FAILURE);
                             mRunning--;
+                            mStopRequest = true;
+                            mSubscription.cancel();
 
                             mViewModel.rmCancelEventListener(cancelEventListener);
                             StreamWorker.this.notify();
@@ -265,7 +293,9 @@ public class StreamingService extends IntentService {
                         synchronized (StreamWorker.this) {
                             mViewModel.rmCancelEventListener(cancelEventListener);
 
+                            mStopRequest = true;
                             mSubscription.cancel();
+
                             StreamWorker.this.notify();
                         }
                     }
@@ -273,20 +303,24 @@ public class StreamingService extends IntentService {
 
             } catch (IOException e) {
                 e.printStackTrace();
-            }
 
+                mStopRequest = true;
+                mSubscription.cancel();
+            }
         }
 
         @Override
         public void onError(Throwable e) {
             Log.e(TAG, "Uploading stream error", e);
+            mStopRequest = true;
+            mSubscription.cancel();
         }
 
         @Override
         public void onComplete() {
             Log.i(TAG, String.format(">>>>>>>>>>> Earo say %s complete streaming",
                     mViewModel.getUploadModel().getName()));
-            uploadDone(mViewModel);
+            mStopRequest = true;
         }
     }
 }

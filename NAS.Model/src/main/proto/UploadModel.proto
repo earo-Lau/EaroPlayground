@@ -15,6 +15,7 @@ message UploadModel {
     string id = 1;
     string name = 2;
     int64 length = 3;
+    bytes progress = 5;
 
     StreamingNode root = 4;
 }
