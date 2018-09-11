@@ -22,7 +22,10 @@ class UploadController(BaseAPIController):
 
         try:
             streaming_node = self.__stream_node_handler.generator(upload_model)
+            size = self.__stream_node_handler.node_size(streaming_node)
+            upload_model.progress = bytes(bytearray(size))
             upload_model.root.CopyFrom(streaming_node)
+
             stream = self.__upload_model_handler.save_temp_file(upload_model)
 
             self._ok(stream)
@@ -40,6 +43,7 @@ class UploadController(BaseAPIController):
         f_locker = UploadModelHandler.fileSaveLocker.get_locker(streaming_node.upload_modle)
         f_locker.acquire()
 
+        # get uploading temp file
         source_model = self.__upload_model_handler.get_temp_file(streaming_node.upload_modle)
         if not source_model:
             f_locker.release()
@@ -51,7 +55,14 @@ class UploadController(BaseAPIController):
             f_locker.release()
             self._http_server.send_error(500, 'file "{0}" content error'.format(source_model.name))
 
+        # update node stream
         source_node.stream = streaming_node.stream
+        # update progress
+        progress = bytearray(source_model.progress)
+        progress[source_node.id] = 1
+        source_model.progress = bytes(progress)
+
+        # save temp file
         self.__upload_model_handler.save_temp_file(source_model)
         f_locker.release()
 

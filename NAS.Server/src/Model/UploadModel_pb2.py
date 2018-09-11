@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='NAS.Model',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x11UploadModel.proto\x12\tNAS.Model\"\xa2\x01\n\rStreamingNode\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0e\n\x06length\x18\x02 \x01(\x03\x12\x0e\n\x06stream\x18\x03 \x01(\x0c\x12\x14\n\x0cupload_modle\x18\x06 \x01(\t\x12&\n\x04left\x18\x04 \x01(\x0b\x32\x18.NAS.Model.StreamingNode\x12\'\n\x05right\x18\x05 \x01(\x0b\x32\x18.NAS.Model.StreamingNode\"_\n\x0bUploadModel\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0e\n\x06length\x18\x03 \x01(\x03\x12&\n\x04root\x18\x04 \x01(\x0b\x32\x18.NAS.Model.StreamingNodeb\x06proto3')
+  serialized_pb=_b('\n\x11UploadModel.proto\x12\tNAS.Model\"\xa2\x01\n\rStreamingNode\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0e\n\x06length\x18\x02 \x01(\x03\x12\x0e\n\x06stream\x18\x03 \x01(\x0c\x12\x14\n\x0cupload_modle\x18\x06 \x01(\t\x12&\n\x04left\x18\x04 \x01(\x0b\x32\x18.NAS.Model.StreamingNode\x12\'\n\x05right\x18\x05 \x01(\x0b\x32\x18.NAS.Model.StreamingNode\"q\n\x0bUploadModel\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0e\n\x06length\x18\x03 \x01(\x03\x12\x10\n\x08progress\x18\x05 \x01(\x0c\x12&\n\x04root\x18\x04 \x01(\x0b\x32\x18.NAS.Model.StreamingNodeb\x06proto3')
 )
 
 
@@ -120,7 +120,14 @@ _UPLOADMODEL = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='root', full_name='NAS.Model.UploadModel.root', index=3,
+      name='progress', full_name='NAS.Model.UploadModel.progress', index=3,
+      number=5, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='root', full_name='NAS.Model.UploadModel.root', index=4,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -139,7 +146,7 @@ _UPLOADMODEL = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=197,
-  serialized_end=292,
+  serialized_end=310,
 )
 
 _STREAMINGNODE.fields_by_name['left'].message_type = _STREAMINGNODE

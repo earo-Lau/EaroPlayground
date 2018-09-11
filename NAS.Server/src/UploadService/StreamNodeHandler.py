@@ -59,3 +59,9 @@ class StreamNodeHandler(object):
             node.right.CopyFrom(right_node)
 
         return node
+
+    def node_size(self, root_node):
+        if root_node.HasField('right'):
+            return self.node_size(root_node.right)
+
+        return root_node.id + 1

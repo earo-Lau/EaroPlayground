@@ -11,7 +11,7 @@ class UploadModelHandler:
 
     __signature_key = 'c4cd977a71d4e935a29694ef4a14f9ee6701ac01c67e08c021f623af5d324f31'
     __temp_path = '/tmp/NAS.Server/upload'
-    __save_path = 'upload'
+    __save_path = '../upload'
 
     def __init__(self):
         pass
@@ -55,7 +55,6 @@ class UploadModelHandler:
 
     def retrieval_node(self, root, val):
         """
-
         :type root: StreamingNode
         :type val: int
         :rtype: StreamingNode

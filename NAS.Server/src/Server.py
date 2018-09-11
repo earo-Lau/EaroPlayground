@@ -58,6 +58,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     server = main(args.port)
+    if sys.platform != 'darwin':
+        sys.stdin = open('/dev/tty')
+
     try:
         user_input = raw_input('press ctrl+c to stop...\n')
     except KeyboardInterrupt:
