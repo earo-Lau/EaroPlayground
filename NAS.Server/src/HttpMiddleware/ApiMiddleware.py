@@ -1,10 +1,10 @@
 import HttpMiddleware
-from src.APIController.UploadController import UploadController
-from src.APIController.APIRouter import APIRouteTable
-from src.APIController.HelloController import HelloController
-from src.HttpContext import HttpContext
-from src.RequestHandler import RequestHandler
-from src.APIController import APIRouter
+from APIController.UploadController import UploadController
+from APIController.APIRouter import APIRouteTable
+from APIController.HelloController import HelloController
+from HttpContext import HttpContext
+from RequestHandler import RequestHandler
+from APIController import APIRouter
 
 
 class ApiMiddleware(HttpMiddleware.HttpMiddleware):

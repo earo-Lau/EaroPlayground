@@ -1,9 +1,9 @@
 import logging
 
-from src.APIController.BaseAPIController import BaseAPIController
-from src.Model.UploadModel_pb2 import UploadModel, StreamingNode
-from src.UploadService.StreamNodeHandler import StreamNodeHandler
-from src.UploadService.UploadModelHandler import UploadModelHandler
+from APIController.BaseAPIController import BaseAPIController
+from Model.UploadModel_pb2 import UploadModel, StreamingNode
+from UploadService.StreamNodeHandler import StreamNodeHandler
+from UploadService.UploadModelHandler import UploadModelHandler
 
 
 # noinspection PyBroadException

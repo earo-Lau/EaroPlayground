@@ -1,4 +1,4 @@
-from src.APIController.BaseAPIController import BaseAPIController
+from APIController.BaseAPIController import BaseAPIController
 
 
 class HelloController(BaseAPIController):

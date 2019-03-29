@@ -1,4 +1,4 @@
-from src.RequestHandler import RequestHandler
+from RequestHandler import RequestHandler
 
 
 class BaseAPIController(object):

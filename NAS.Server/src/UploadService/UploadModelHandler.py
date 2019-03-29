@@ -2,8 +2,8 @@ import hashlib
 import logging
 import os
 
-from src.Model.UploadModel_pb2 import UploadModel
-from src.UploadService.FileSaveLocker import FileSaveLocker
+from Model.UploadModel_pb2 import UploadModel
+from UploadService.FileSaveLocker import FileSaveLocker
 
 
 class UploadModelHandler:

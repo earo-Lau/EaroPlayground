@@ -1,4 +1,4 @@
-from src.HttpContext import HttpContext
+from HttpContext import HttpContext
 import re
 
 

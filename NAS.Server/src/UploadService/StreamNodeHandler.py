@@ -1,6 +1,6 @@
 import math
 
-from src.Model.UploadModel_pb2 import StreamingNode
+from Model.UploadModel_pb2 import StreamingNode
 
 
 class StreamNodeHandler(object):
